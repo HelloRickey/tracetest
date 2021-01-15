@@ -67,12 +67,14 @@ async function issueTrackAsset() {
   );
   const issueTxn = issueOp.transaction();
   console.log(issueTxn);
-  let handle = await network.submitTransaction(issueTxn);
-  console.log(handle);
-  let status = await network.getTxnStatus(handle);
-  console.log(status);
+  // let handle = await network.submitTransaction(issueTxn);
+  // console.log(handle);
+  // let status = await network.getTxnStatus(handle);
+  // console.log(status);
 }
-//issueTrackAsset();
+issueTrackAsset();
+
+
 async function TransferTrackAsset() {
   const amount = BigInt(100);
   const transferAmount = BigInt(75);
@@ -121,12 +123,13 @@ async function TransferTrackAsset() {
     blockCount
   ).add_transfer_operation(transferOp1Txn);
   const xfrTxn1 = xfrTxn1Builder.transaction();
-  const handle = await network.submitTransaction(xfrTxn1);
-  console.log(handle);
-  const status = await network.getTxnStatus(handle);
-  console.log(status);
+  console.log(xfrTxn1);
+  // const handle = await network.submitTransaction(xfrTxn1);
+  // console.log(handle);
+  // const status = await network.getTxnStatus(handle);
+  // console.log(status);
 }
-//TransferTrackAsset();
+// TransferTrackAsset();
 function test(){
   
   const trackingKey = FindoraWasm.AssetTracerKeyPair.new();
