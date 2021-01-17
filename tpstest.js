@@ -1,11 +1,12 @@
 const FindoraWasm = require("./lib/pkg/wasm");
 const Network = require("./lib/network.js");
-const HOST = "mainnet-dev.findora.org";
+//set local node
+const HOST = "localhost";
 const SUBMISSION_PORT = "8669";
 const LEDGER_PORT = "8668";
 const QUERY_PORT = "8667";
 const TENDERMINT_PORT="26657";
-const PROTOCOL = "https";
+const PROTOCOL = "http";
 const network = new Network.Network(
   PROTOCOL,
   HOST,
@@ -79,6 +80,6 @@ async function runtps(submitCount) {
    }, 1000);
 }
 //set total transaction count
-const submitCount = 5;
+const submitCount = 100;
 runtps(submitCount);
 
