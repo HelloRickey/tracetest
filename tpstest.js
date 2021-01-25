@@ -80,6 +80,6 @@ async function runtps(submitCount) {
    }, 1000);
 }
 //set total transaction count
-const submitCount = 100;
+const submitCount = 500;
 runtps(submitCount);
 

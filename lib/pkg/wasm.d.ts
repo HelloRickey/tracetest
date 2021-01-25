@@ -298,6 +298,45 @@ export function wasm_credential_verify(issuer_pub_key: CredIssuerPublicKey, attr
 */
 export function trace_assets(xfr_body: any, tracer_keypair: AssetTracerKeyPair, candidate_assets: any): any;
 /**
+* Returns bech32 encoded representation of an XfrPublicKey.
+* @param {XfrPublicKey} key
+* @returns {string}
+*/
+export function public_key_to_bech32(key: XfrPublicKey): string;
+/**
+* Converts a bech32 encoded public key string to a public key.
+* @param {string} key_pair
+* @returns {XfrPublicKey}
+*/
+export function public_key_from_bech32(key_pair: string): XfrPublicKey;
+/**
+* @param {string} key_pair
+* @returns {string}
+*/
+export function bech32_to_base64(key_pair: string): string;
+/**
+* @param {string} key_pair
+* @returns {string}
+*/
+export function base64_to_bech32(key_pair: string): string;
+/**
+* @param {string} key_pair
+* @param {string} password
+* @returns {Uint8Array}
+*/
+export function encryption_pbkdf2_aes256gcm(key_pair: string, password: string): Uint8Array;
+/**
+* @param {Uint8Array} enc_key_pair
+* @param {string} password
+* @returns {string}
+*/
+export function decryption_pbkdf2_aes256gcm(enc_key_pair: Uint8Array, password: string): string;
+/**
+* @param {string} sk_str
+* @returns {XfrKeyPair | undefined}
+*/
+export function create_keypair_from_secret(sk_str: string): XfrKeyPair | undefined;
+/**
 * When an asset is defined, several options governing the assets must be
 * specified:
 * 1. **Traceable**: Records and identities of traceable assets can be decrypted by a provided tracking key. By defaults, assets do not have
