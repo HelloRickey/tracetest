@@ -102,7 +102,7 @@ async function publicTransfer(fromKeypair, toPublicKey, tokenCode) {
         assetRecord,
         ownerMemo,
         fromKeypair,
-        BigInt(100)
+        BigInt(50)
       );
       console.log(transferOp);
     }
@@ -111,7 +111,7 @@ async function publicTransfer(fromKeypair, toPublicKey, tokenCode) {
 
   transferOp = transferOp
     .add_output_no_tracking(
-      BigInt(100),
+      BigInt(150),
       FindoraWasm.public_key_from_base64(toPublicKey),
       tokenCode
     ).balance().create().sign(fromKeypair).transaction();
@@ -126,8 +126,8 @@ async function publicTransfer(fromKeypair, toPublicKey, tokenCode) {
  
 }
 // publicTransfer(
-//   aliceKeyPair_Recover,
-//   "ruQzNWkIN76hGiwW8jEKMhNXZdKI02hzzuh03gofCQA=",
+//   bobKeyPair_Recover,
+//   FindoraWasm.public_key_to_base64(aliceKeyPair_Recover.get_pk()),
 //   "BU3M4KE0C3bRtsZJv-7wBB8KgnNDDglAQlnoLta6QEE="
 // );
 
@@ -158,4 +158,4 @@ async function calBalance(fromKeypair) {
   }
   console.log(assets);
 }
-calBalance(aliceKeyPair_Recover);
+calBalance(bobKeyPair_Recover);
