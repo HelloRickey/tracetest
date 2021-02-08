@@ -155,10 +155,10 @@ export function new_keypair_from_seed(seed_str: string, name?: string): XfrKeyPa
 export function public_key_to_base64(key: XfrPublicKey): string;
 /**
 * Converts a base64 encoded public key string to a public key.
-* @param {string} key_pair
+* @param {string} pk
 * @returns {XfrPublicKey}
 */
-export function public_key_from_base64(key_pair: string): XfrPublicKey;
+export function public_key_from_base64(pk: string): XfrPublicKey;
 /**
 * Expresses a transfer key pair as a hex-encoded string.
 * To decode the string, use `keypair_from_str` function.
@@ -305,20 +305,20 @@ export function trace_assets(xfr_body: any, tracer_keypair: AssetTracerKeyPair, 
 export function public_key_to_bech32(key: XfrPublicKey): string;
 /**
 * Converts a bech32 encoded public key string to a public key.
-* @param {string} key_pair
+* @param {string} addr
 * @returns {XfrPublicKey}
 */
-export function public_key_from_bech32(key_pair: string): XfrPublicKey;
+export function public_key_from_bech32(addr: string): XfrPublicKey;
 /**
-* @param {string} key_pair
+* @param {string} pk
 * @returns {string}
 */
-export function bech32_to_base64(key_pair: string): string;
+export function bech32_to_base64(pk: string): string;
 /**
-* @param {string} key_pair
+* @param {string} pk
 * @returns {string}
 */
-export function base64_to_bech32(key_pair: string): string;
+export function base64_to_bech32(pk: string): string;
 /**
 * @param {string} key_pair
 * @param {string} password
@@ -336,6 +336,60 @@ export function decryption_pbkdf2_aes256gcm(enc_key_pair: Uint8Array, password: 
 * @returns {XfrKeyPair | undefined}
 */
 export function create_keypair_from_secret(sk_str: string): XfrKeyPair | undefined;
+/**
+* Randomly generate a 12words-length mnemonic.
+* @returns {string}
+*/
+export function generate_mnemonic_default(): string;
+/**
+* Generate mnemonic with custom length and language.
+* - @param `wordslen`: acceptable value are one of [ 12, 15, 18, 21, 24 ]
+* - @param `lang`: acceptable value are one of [ "en", "zh", "zh_traditional", "fr", "it", "ko", "sp", "jp" ]
+* @param {number} wordslen
+* @param {string} lang
+* @returns {string}
+*/
+export function generate_mnemonic_custom(wordslen: number, lang: string): string;
+/**
+* Restore the XfrKeyPair from a mnemonic with a default bip44-path,
+* that is "m/44'/917'/0'/0/0" ("m/44'/coin'/account'/change/address").
+* @param {string} phrase
+* @returns {XfrKeyPair}
+*/
+export function restore_keypair_from_mnemonic_default(phrase: string): XfrKeyPair;
+/**
+* Restore the XfrKeyPair from a mnemonic with custom params,
+* in bip44 form.
+* @param {string} phrase
+* @param {string} lang
+* @param {BipPath} path
+* @returns {XfrKeyPair}
+*/
+export function restore_keypair_from_mnemonic_bip44(phrase: string, lang: string, path: BipPath): XfrKeyPair;
+/**
+* Restore the XfrKeyPair from a mnemonic with custom params,
+* in bip49 form.
+* @param {string} phrase
+* @param {string} lang
+* @param {BipPath} path
+* @returns {XfrKeyPair}
+*/
+export function restore_keypair_from_mnemonic_bip49(phrase: string, lang: string, path: BipPath): XfrKeyPair;
+/**
+* ID of FRA, in `String` format.
+* @returns {string}
+*/
+export function fra_get_asset_code(): string;
+/**
+* Fee smaller than this value will be denied.
+* @returns {BigInt}
+*/
+export function fra_get_minimal_fee(): BigInt;
+/**
+* The destination for fee to be transfered to.
+* @returns {XfrPublicKey}
+*/
+export function fra_get_dest_pubkey(): XfrPublicKey;
 /**
 * When an asset is defined, several options governing the assets must be
 * specified:
@@ -401,6 +455,14 @@ export class AssetRules {
 * @returns {AssetRules}
 */
   set_transfer_multisig_rules(multisig_rules: SignatureRules): AssetRules;
+/**
+* Set the decimal number of asset. Return error string if failed, otherwise return changed asset.
+* #param {Number} decimals - The number of decimals used to set its user representation.
+* Decimals should be 0 ~ 255.
+* @param {number} decimals
+* @returns {AssetRules}
+*/
+  set_decimals(decimals: number): AssetRules;
 }
 /**
 * Key pair used by asset tracers to decrypt asset amounts, types, and identity
@@ -510,6 +572,20 @@ export class AuthenticatedAssetRecord {
 * @returns {AuthenticatedAssetRecord}
 */
   static from_json_record(record: any): AuthenticatedAssetRecord;
+}
+/**
+* Use this struct to express a Bip44/Bip49 path.
+*/
+export class BipPath {
+  free(): void;
+/**
+* @param {number} coin
+* @param {number} account
+* @param {number} change
+* @param {number} address
+* @returns {BipPath}
+*/
+  static new(coin: number, account: number, change: number, address: number): BipPath;
 }
 /**
 * This object represents an asset record owned by a ledger key pair.
@@ -868,6 +944,13 @@ export class TracingPolicy {
 */
 export class TransactionBuilder {
   free(): void;
+/**
+* A simple fee checker for mainnet v1.0.
+*
+* SEE [check_fee](ledger::data_model::Transaction::check_fee)
+* @returns {boolean}
+*/
+  check_fee(): boolean;
 /**
 * Create a new transaction builder.
 * @param {BigInt} seq_id - Unique sequence ID to prevent replay attacks.
