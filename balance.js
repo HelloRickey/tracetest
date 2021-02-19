@@ -1,4 +1,6 @@
 const FindoraWasm = require("./lib/pkg/wasm");
+
+
 const Network = require("./lib/network.js");
 const base64 = require("base64-js");
 //set local node
