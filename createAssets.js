@@ -16,6 +16,8 @@ const network = new Network.Network(
 );
 async function createAsset() {
   const keypair = FindoraWasm.new_keypair();
+  const publickey = FindoraWasm.public_key_to_base64(keypair.get_pk());
+  console.log(publickey);
   const tokenCode = FindoraWasm.random_asset_type();
   const memo = "this is a test asset";
   const assetRules = FindoraWasm.AssetRules.new();
