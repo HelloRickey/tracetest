@@ -155,10 +155,10 @@ export function new_keypair_from_seed(seed_str: string, name?: string): XfrKeyPa
 export function public_key_to_base64(key: XfrPublicKey): string;
 /**
 * Converts a base64 encoded public key string to a public key.
-* @param {string} key_pair
+* @param {string} pk
 * @returns {XfrPublicKey}
 */
-export function public_key_from_base64(key_pair: string): XfrPublicKey;
+export function public_key_from_base64(pk: string): XfrPublicKey;
 /**
 * Expresses a transfer key pair as a hex-encoded string.
 * To decode the string, use `keypair_from_str` function.
@@ -293,14 +293,112 @@ export function wasm_credential_verify(issuer_pub_key: CredIssuerPublicKey, attr
 * @param {JsValue} candidate_assets - List of asset types traced by the tracer keypair.
 * @param {any} xfr_body
 * @param {AssetTracerKeyPair} tracer_keypair
-* @param {any} candidate_assets
+* @param {any} _candidate_assets
 * @returns {any}
 */
-export function trace_assets(xfr_body: any, tracer_keypair: AssetTracerKeyPair, candidate_assets: any): any;
+export function trace_assets(xfr_body: any, tracer_keypair: AssetTracerKeyPair, _candidate_assets: any): any;
+/**
+* Returns bech32 encoded representation of an XfrPublicKey.
+* @param {XfrPublicKey} key
+* @returns {string}
+*/
+export function public_key_to_bech32(key: XfrPublicKey): string;
+/**
+* Converts a bech32 encoded public key string to a public key.
+* @param {string} addr
+* @returns {XfrPublicKey}
+*/
+export function public_key_from_bech32(addr: string): XfrPublicKey;
+/**
+* @param {string} pk
+* @returns {string}
+*/
+export function bech32_to_base64(pk: string): string;
+/**
+* @param {string} pk
+* @returns {string}
+*/
+export function base64_to_bech32(pk: string): string;
+/**
+* @param {string} key_pair
+* @param {string} password
+* @returns {Uint8Array}
+*/
+export function encryption_pbkdf2_aes256gcm(key_pair: string, password: string): Uint8Array;
+/**
+* @param {Uint8Array} enc_key_pair
+* @param {string} password
+* @returns {string}
+*/
+export function decryption_pbkdf2_aes256gcm(enc_key_pair: Uint8Array, password: string): string;
+/**
+* @param {string} sk_str
+* @returns {XfrKeyPair | undefined}
+*/
+export function create_keypair_from_secret(sk_str: string): XfrKeyPair | undefined;
+/**
+* @param {XfrKeyPair} kp
+* @returns {XfrPublicKey}
+*/
+export function get_pk_from_keypair(kp: XfrKeyPair): XfrPublicKey;
+/**
+* Randomly generate a 12words-length mnemonic.
+* @returns {string}
+*/
+export function generate_mnemonic_default(): string;
+/**
+* Generate mnemonic with custom length and language.
+* - @param `wordslen`: acceptable value are one of [ 12, 15, 18, 21, 24 ]
+* - @param `lang`: acceptable value are one of [ "en", "zh", "zh_traditional", "fr", "it", "ko", "sp", "jp" ]
+* @param {number} wordslen
+* @param {string} lang
+* @returns {string}
+*/
+export function generate_mnemonic_custom(wordslen: number, lang: string): string;
+/**
+* Restore the XfrKeyPair from a mnemonic with a default bip44-path,
+* that is "m/44'/917'/0'/0/0" ("m/44'/coin'/account'/change/address").
+* @param {string} phrase
+* @returns {XfrKeyPair}
+*/
+export function restore_keypair_from_mnemonic_default(phrase: string): XfrKeyPair;
+/**
+* Restore the XfrKeyPair from a mnemonic with custom params,
+* in bip44 form.
+* @param {string} phrase
+* @param {string} lang
+* @param {BipPath} path
+* @returns {XfrKeyPair}
+*/
+export function restore_keypair_from_mnemonic_bip44(phrase: string, lang: string, path: BipPath): XfrKeyPair;
+/**
+* Restore the XfrKeyPair from a mnemonic with custom params,
+* in bip49 form.
+* @param {string} phrase
+* @param {string} lang
+* @param {BipPath} path
+* @returns {XfrKeyPair}
+*/
+export function restore_keypair_from_mnemonic_bip49(phrase: string, lang: string, path: BipPath): XfrKeyPair;
+/**
+* ID of FRA, in `String` format.
+* @returns {string}
+*/
+export function fra_get_asset_code(): string;
+/**
+* Fee smaller than this value will be denied.
+* @returns {BigInt}
+*/
+export function fra_get_minimal_fee(): BigInt;
+/**
+* The destination for fee to be transfered to.
+* @returns {XfrPublicKey}
+*/
+export function fra_get_dest_pubkey(): XfrPublicKey;
 /**
 * When an asset is defined, several options governing the assets must be
 * specified:
-* 1. **Traceable**: Records and identities of traceable assets can be decrypted by a provided tracking key. By defaults, assets do not have
+* 1. **Traceable**: Records and identities of traceable assets can be decrypted by a provided tracing key. By defaults, assets do not have
 * any tracing policies.
 * 2. **Transferable**: Non-transferable assets can only be transferred once from the issuer to another user. By default, assets are transferable.
 * 3. **Updatable**: Whether the asset memo can be updated. By default, assets are not updatable.
@@ -362,6 +460,14 @@ export class AssetRules {
 * @returns {AssetRules}
 */
   set_transfer_multisig_rules(multisig_rules: SignatureRules): AssetRules;
+/**
+* Set the decimal number of asset. Return error string if failed, otherwise return changed asset.
+* #param {Number} decimals - The number of decimals used to set its user representation.
+* Decimals should be 0 ~ 255.
+* @param {number} decimals
+* @returns {AssetRules}
+*/
+  set_decimals(decimals: number): AssetRules;
 }
 /**
 * Key pair used by asset tracers to decrypt asset amounts, types, and identity
@@ -473,6 +579,20 @@ export class AuthenticatedAssetRecord {
   static from_json_record(record: any): AuthenticatedAssetRecord;
 }
 /**
+* Use this struct to express a Bip44/Bip49 path.
+*/
+export class BipPath {
+  free(): void;
+/**
+* @param {number} coin
+* @param {number} account
+* @param {number} change
+* @param {number} address
+* @returns {BipPath}
+*/
+  static new(coin: number, account: number, change: number, address: number): BipPath;
+}
+/**
 * This object represents an asset record owned by a ledger key pair.
 * @see {@link module:Findora-Wasm.open_client_asset_record|open_client_asset_record} for information about how to decrypt an encrypted asset
 * record.
@@ -503,6 +623,11 @@ export class ClientAssetRecord {
 * @returns {ClientAssetRecord}
 */
   static from_json(val: any): ClientAssetRecord;
+/**
+* ClientAssetRecord ==> JsValue
+* @returns {any}
+*/
+  to_json(): any;
 }
 /**
 * Public key of a credential issuer.
@@ -671,6 +796,32 @@ export class CredentialUserKeyPair {
   static from_json(val: any): CredentialUserKeyPair;
 }
 /**
+*/
+export class FeeInputs {
+  free(): void;
+/**
+* @returns {FeeInputs}
+*/
+  static new(): FeeInputs;
+/**
+* @param {BigInt} am
+* @param {TxoRef} tr
+* @param {ClientAssetRecord} ar
+* @param {OwnerMemo | undefined} om
+* @param {XfrKeyPair} kp
+*/
+  append(am: BigInt, tr: TxoRef, ar: ClientAssetRecord, om: OwnerMemo | undefined, kp: XfrKeyPair): void;
+/**
+* @param {BigInt} am
+* @param {TxoRef} tr
+* @param {ClientAssetRecord} ar
+* @param {OwnerMemo | undefined} om
+* @param {XfrKeyPair} kp
+* @returns {FeeInputs}
+*/
+  append2(am: BigInt, tr: TxoRef, ar: ClientAssetRecord, om: OwnerMemo | undefined, kp: XfrKeyPair): FeeInputs;
+}
+/**
 * Blinding factor for a custom data operation. A blinding factor adds a random value to the
 * custom data being hashed to make the hash hiding.
 */
@@ -814,21 +965,51 @@ export class TracingPolicy {
 * @param {AssetTracerKeyPair} tracing_key
 * @returns {TracingPolicy}
 */
-  static new_with_tracking(tracing_key: AssetTracerKeyPair): TracingPolicy;
+  static new_with_tracing(tracing_key: AssetTracerKeyPair): TracingPolicy;
 /**
 * @param {AssetTracerKeyPair} tracing_key
 * @param {CredIssuerPublicKey} cred_issuer_key
 * @param {any} reveal_map
-* @param {boolean} tracking
+* @param {boolean} tracing
 * @returns {TracingPolicy}
 */
-  static new_with_identity_tracking(tracing_key: AssetTracerKeyPair, cred_issuer_key: CredIssuerPublicKey, reveal_map: any, tracking: boolean): TracingPolicy;
+  static new_with_identity_tracing(tracing_key: AssetTracerKeyPair, cred_issuer_key: CredIssuerPublicKey, reveal_map: any, tracing: boolean): TracingPolicy;
 }
 /**
 * Structure that allows users to construct arbitrary transactions.
 */
 export class TransactionBuilder {
   free(): void;
+/**
+* @param am: amount to pay
+* @param kp: owner's XfrKeyPair
+* @param {BigInt} am
+* @param {XfrKeyPair} kp
+* @returns {TransactionBuilder}
+*/
+  add_fee_relative_auto(am: BigInt, kp: XfrKeyPair): TransactionBuilder;
+/**
+* Use this func to get the necessary infomations for generating `Relative Inputs`
+*
+* - TxoRef::Relative("Element index of the result")
+* - ClientAssetRecord::from_json("Element of the result")
+* @returns {any[]}
+*/
+  get_relative_outputs(): any[];
+/**
+* As the last operation of any transaction,
+* add a static fee to the transaction.
+* @param {FeeInputs} inputs
+* @returns {TransactionBuilder}
+*/
+  add_fee(inputs: FeeInputs): TransactionBuilder;
+/**
+* A simple fee checker for mainnet v1.0.
+*
+* SEE [check_fee](ledger::data_model::Transaction::check_fee)
+* @returns {boolean}
+*/
+  check_fee(): boolean;
 /**
 * Create a new transaction builder.
 * @param {BigInt} seq_id - Unique sequence ID to prevent replay attacks.
@@ -979,6 +1160,11 @@ export class TransactionBuilder {
 */
   transaction(): string;
 /**
+* Calculates transaction handle.
+* @returns {string}
+*/
+  transaction_handle(): string;
+/**
 * Fetches a client record from a transaction.
 * @param {number} idx - Record to fetch. Records are added to the transaction builder sequentially.
 * @param {number} idx
@@ -1031,7 +1217,7 @@ export class TransferOperationBuilder {
 * @param {BigInt} amount
 * @returns {TransferOperationBuilder}
 */
-  add_input_with_tracking(txo_ref: TxoRef, asset_record: ClientAssetRecord, owner_memo: OwnerMemo | undefined, tracing_policies: TracingPolicies, key: XfrKeyPair, amount: BigInt): TransferOperationBuilder;
+  add_input_with_tracing(txo_ref: TxoRef, asset_record: ClientAssetRecord, owner_memo: OwnerMemo | undefined, tracing_policies: TracingPolicies, key: XfrKeyPair, amount: BigInt): TransferOperationBuilder;
 /**
 * Wraps around TransferOperationBuilder to add an input to a transfer operation builder.
 * @param {TxoRef} txo_ref - Absolute or relative utxo reference
@@ -1051,7 +1237,7 @@ export class TransferOperationBuilder {
 * @param {BigInt} amount
 * @returns {TransferOperationBuilder}
 */
-  add_input_no_tracking(txo_ref: TxoRef, asset_record: ClientAssetRecord, owner_memo: OwnerMemo | undefined, key: XfrKeyPair, amount: BigInt): TransferOperationBuilder;
+  add_input_no_tracing(txo_ref: TxoRef, asset_record: ClientAssetRecord, owner_memo: OwnerMemo | undefined, key: XfrKeyPair, amount: BigInt): TransferOperationBuilder;
 /**
 * Wraps around TransferOperationBuilder to add an output to a transfer operation builder.
 *
@@ -1071,7 +1257,7 @@ export class TransferOperationBuilder {
 * @param {boolean} conf_type
 * @returns {TransferOperationBuilder}
 */
-  add_output_with_tracking(amount: BigInt, recipient: XfrPublicKey, tracing_policies: TracingPolicies, code: string, conf_amount: boolean, conf_type: boolean): TransferOperationBuilder;
+  add_output_with_tracing(amount: BigInt, recipient: XfrPublicKey, tracing_policies: TracingPolicies, code: string, conf_amount: boolean, conf_type: boolean): TransferOperationBuilder;
 /**
 * Wraps around TransferOperationBuilder to add an output to a transfer operation builder.
 *
@@ -1088,7 +1274,7 @@ export class TransferOperationBuilder {
 * @param {boolean} conf_type
 * @returns {TransferOperationBuilder}
 */
-  add_output_no_tracking(amount: BigInt, recipient: XfrPublicKey, code: string, conf_amount: boolean, conf_type: boolean): TransferOperationBuilder;
+  add_output_no_tracing(amount: BigInt, recipient: XfrPublicKey, code: string, conf_amount: boolean, conf_type: boolean): TransferOperationBuilder;
 /**
 * Wraps around TransferOperationBuilder to ensure the transfer inputs and outputs are balanced.
 * This function will add change outputs for all unspent portions of input records.
@@ -1172,7 +1358,7 @@ export class XfrKeyPair {
 /**
 * @returns {XfrPublicKey}
 */
-  get_pk(): XfrPublicKey;
+  pub_key: XfrPublicKey;
 }
 /**
 */
