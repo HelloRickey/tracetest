@@ -1,7 +1,7 @@
 const FindoraWasm = require("./lib/pkg/wasm");
 const Network = require("./lib/network.js");
 //set local node
-const HOST = "dev-staging.dev.findora.org";
+const HOST = "prod-alpha.prod.findora.org";
 const SUBMISSION_PORT = "8669";
 const LEDGER_PORT = "8668";
 const QUERY_PORT = "8667";
@@ -100,19 +100,22 @@ async function startSubmit(privateStrArray) {
 
 var timer;
 
-// timer = setInterval(function () {
-//     let privateStrArray = [
-//       "7ZLbEaHRajq9xXCCVT4ApX7yjEVFs5hyN27C9JvZ5Cs=",
-//       "glzudSr1lCGmkLjETDeUDCP_hBNkCmXILnPHPCRuI5Y=",
-//       "RsZ7qQc9Hr9lV4dcZIMZztiwlfVKdyOvZ5BXwUzDS-Y=",
-//       "wpGxSYNAU3zRGw77iHzl49aEX_fylybBotAOEHduMNk=",
-//       "5SPAYXK5dUAt7I6YmLXRDRBCis2mg-1KrmZuBsvAW4A=",
-//       "Y6umoUmBJRPYJU5n_Y9bHuhoHm6aDMsxDI9FLJzOEXc=",
-//       "Xtfv_LKPeIjrBqeuVkt9TfEe61G17SLDpbofevVhuhw=",
-//     ];
+timer = setInterval(async function () {
+  //   let privateStrArray = [
+  //     "7ZLbEaHRajq9xXCCVT4ApX7yjEVFs5hyN27C9JvZ5Cs=",
+  //     "glzudSr1lCGmkLjETDeUDCP_hBNkCmXILnPHPCRuI5Y=",
+  //     "RsZ7qQc9Hr9lV4dcZIMZztiwlfVKdyOvZ5BXwUzDS-Y=",
+  //     "wpGxSYNAU3zRGw77iHzl49aEX_fylybBotAOEHduMNk=",
+  //     "5SPAYXK5dUAt7I6YmLXRDRBCis2mg-1KrmZuBsvAW4A=",
+  //     "Y6umoUmBJRPYJU5n_Y9bHuhoHm6aDMsxDI9FLJzOEXc=",
+  //     "Xtfv_LKPeIjrBqeuVkt9TfEe61G17SLDpbofevVhuhw=",
+  //   ];
+  // startSubmit(privateStrArray);
+    const result=await network.getStateCommitment();
+    console.log(result);
 
-//   startSubmit(privateStrArray);
-// }, 2000);
+}, 2000);
+
 function getPublicKey() {
   let privateStrArray = [
     "7ZLbEaHRajq9xXCCVT4ApX7yjEVFs5hyN27C9JvZ5Cs=",
@@ -133,4 +136,4 @@ function getPublicKey() {
       console.log(publickey);
   }
 }
-getPublicKey();
+// getPublicKey();
